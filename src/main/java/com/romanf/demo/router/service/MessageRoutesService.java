@@ -1,7 +1,7 @@
 package com.romanf.demo.router.service;
 
-import com.romanf.demo.router.controller.MessageRequest;
-import com.romanf.demo.router.controller.MessageType;
+import com.romanf.demo.router.dto.RequestMessage;
+import com.romanf.demo.router.dto.RequestMessageType;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
@@ -9,24 +9,26 @@ import org.springframework.web.client.RestTemplate;
 
 @Service
 @RequiredArgsConstructor
-public class MessageService {
+public class MessageRoutesService {
 
     @Value("${rest.client.url}")
     private String url;
 
+    private static final String SENT_TO_KAFKA = "Message sent to Kafka";
+    private static final String SENT_VIA_REST = "Message sent via REST";
+
     private final RestTemplate restTemplate;
     private final CustomKafkaProducer kafkaProducer;
 
-    public String processMessage(MessageRequest request) {
-        if (MessageType.KAFKA.equals(request.getType())) {
+    public String processMessage(RequestMessage request) {
+
+        if (RequestMessageType.KAFKA.equals(request.getType())) {
             kafkaProducer.sendMessageToKafka(request.getMessage());
-            return "Message sent to Kafka";
+            return SENT_TO_KAFKA;
 
-        } else if (MessageType.REST.equals(request.getType())) {
+        } else {
             restTemplate.postForObject(url, request, String.class);
-            return "Message sent via REST";
+            return SENT_VIA_REST;
         }
-
-        return "Invalid type";
     }
 }
