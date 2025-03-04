@@ -1,0 +1,33 @@
+syntax = "proto3";
+
+package com.example.grpc;
+
+service MessageService {
+  rpc SendMessage (MessageRequest) returns (MessageResponse);
+}
+
+// Вложенный объект для отправителя сообщения
+message MessageSender {
+  string name = 1;        // Имя отправителя
+  string email = 2;       // Электронная почта отправителя
+}
+
+// Вложенный объект для метаданных
+message MessageMetadata {
+  string timestamp = 1;   // Время отправки
+  string priority = 2;    // Приоритет сообщения
+}
+
+// Основной запрос, который будет включать отправителя и метаданные
+message MessageRequest {
+  string id = 1;                // Идентификатор сообщения
+  string content = 2;           // Содержимое сообщения
+  MessageSender sender = 3;     // Отправитель сообщения
+  MessageMetadata metadata = 4; // Метаданные сообщения
+}
+
+// Ответ от сервера
+message MessageResponse {
+  string status = 1;            // Статус обработки сообщения
+  string message = 2;           // Сообщение
+}
