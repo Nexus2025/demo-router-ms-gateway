@@ -1,4 +1,4 @@
-package com.romanf.demo.router.service;
+package com.romanf.demo.router.transport;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
