@@ -19,6 +19,6 @@ public class GrpcMessageProcessor implements MessageProcessor {
 
     @Override
     public String process(RequestMessage request) {
-        return grpcClientService.sendMessage(request.getMessage());
+        return grpcClientService.sendMessage(request);
     }
 }
