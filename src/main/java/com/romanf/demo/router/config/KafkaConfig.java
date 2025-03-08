@@ -2,7 +2,8 @@ package com.romanf.demo.router.config;
 
 import org.apache.kafka.clients.producer.ProducerConfig;
 import org.apache.kafka.common.serialization.StringSerializer;
-import org.springframework.beans.factory.annotation.Value;
+import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.kafka.core.DefaultKafkaProducerFactory;
@@ -15,26 +16,32 @@ import java.util.Map;
 @Configuration
 public class KafkaConfig {
 
-    @Value("${kafka.bootstrapServers}")
-    private String bootstrapServers;
-
-    @Bean
-    public KafkaTemplate<String, String> kafkaTemplate() {
-        return new KafkaTemplate<>(producerFactory());
+    @Bean(name = "demoKafkaProperties")
+    @ConfigurationProperties(prefix = "demo.kafka.config")
+    KafkaProperties demoKafkaProperties() {
+        return new KafkaProperties();
     }
 
-    private ProducerFactory<String, String> producerFactory() {
-        return new DefaultKafkaProducerFactory<>(producerConfigs());
+    @Bean(name = "demoKafkaTemplate")
+    public KafkaTemplate<String, String> demoKafkaTemplate(
+            @Qualifier("demoProducerFactory") ProducerFactory<String, String> demoProducerFactory)
+    {
+        return new KafkaTemplate<>(demoProducerFactory);
     }
 
-    private Map<String, Object> producerConfigs() {
-        Map<String, Object> configProps = new HashMap<>();
-        configProps.put(ProducerConfig.BOOTSTRAP_SERVERS_CONFIG, bootstrapServers);
-        configProps.put(ProducerConfig.KEY_SERIALIZER_CLASS_CONFIG, StringSerializer.class);
-        configProps.put(ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG, StringSerializer.class);
-        configProps.put(ProducerConfig.DELIVERY_TIMEOUT_MS_CONFIG, 5000);
-        configProps.put(ProducerConfig.REQUEST_TIMEOUT_MS_CONFIG, 3000);
-        configProps.put(ProducerConfig.MAX_BLOCK_MS_CONFIG, 2000);
-        return configProps;
+    @Bean(name = "demoProducerFactory")
+    public ProducerFactory<String, String> demoProducerFactory(
+            @Qualifier("demoKafkaProperties") KafkaProperties demoKafkaProperties)
+    {
+        Map<String, Object> kafkaConfig = new HashMap<>();
+        kafkaConfig.put(ProducerConfig.BOOTSTRAP_SERVERS_CONFIG, demoKafkaProperties.getBootstrapServers());
+        kafkaConfig.put(ProducerConfig.ACKS_CONFIG, demoKafkaProperties.getAcksConfig());
+        kafkaConfig.put(ProducerConfig.KEY_SERIALIZER_CLASS_CONFIG, StringSerializer.class);
+        kafkaConfig.put(ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG, StringSerializer.class);
+        kafkaConfig.put(ProducerConfig.DELIVERY_TIMEOUT_MS_CONFIG, demoKafkaProperties.getDeliveryTimeoutMsConfig());
+        kafkaConfig.put(ProducerConfig.REQUEST_TIMEOUT_MS_CONFIG, demoKafkaProperties.getRequestTimeoutMsConfig());
+        kafkaConfig.put(ProducerConfig.MAX_BLOCK_MS_CONFIG, demoKafkaProperties.getMaxBlockMsConfig());
+
+        return new DefaultKafkaProducerFactory<>(kafkaConfig);
     }
 }
