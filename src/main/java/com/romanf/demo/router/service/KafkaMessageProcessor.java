@@ -21,7 +21,7 @@ public class KafkaMessageProcessor implements MessageProcessor{
 
     @Override
     public String process(RequestMessage request) {
-        kafkaProducer.sendMessageToKafka(request.getMessage());
+        kafkaProducer.sendMessageToKafka(request.getMessage(), request.getOperId());
         return SENT_TO_KAFKA;
     }
 }
